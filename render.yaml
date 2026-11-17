@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: web2apk-backend
+    runtime: docker
+    plan: free
+    # Render injeta a porta na env PORT automaticamente (server.js já lê).
+    # Plano free "dorme" após ~15 min sem uso: a 1ª geração depois disso
+    # pode levar 1-2 min pra acordar. Para uso sério, use um plano pago
+    # ou Railway/Fly.io/VPS.
+    envVars:
+      - key: CORS_ORIGIN
+        value: "*"

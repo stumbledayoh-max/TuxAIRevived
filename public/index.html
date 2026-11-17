@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Web2APK — Transforme seu site em aplicativo Android</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0b0618;--card:rgba(255,255,255,.06);--line:rgba(255,255,255,.12);--txt:#f4f1ff;--mut:#b9b0d9;--acc:#7c3aed;--acc2:#06b6d4;--ok:#22c55e;--err:#f87171}
+body{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;background:radial-gradient(1000px 500px at 15% -5%,rgba(124,58,237,.45),transparent 60%),radial-gradient(900px 500px at 90% 0%,rgba(6,182,212,.35),transparent 55%),var(--bg);color:var(--txt);min-height:100vh;padding:28px 16px 60px}
+.wrap{max-width:1120px;margin:0 auto}
+header{display:flex;align-items:center;gap:14px;margin-bottom:8px}
+.logo{width:52px;height:52px;border-radius:16px;background:linear-gradient(135deg,var(--acc),var(--acc2));display:grid;place-items:center;font-size:26px;box-shadow:0 10px 30px rgba(124,58,237,.5)}
+h1{font-size:26px;letter-spacing:-.5px} h1 span{background:linear-gradient(90deg,#a78bfa,#22d3ee);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--mut);margin:4px 0 26px;font-size:15px}
+.badge{display:inline-block;font-size:12px;color:#c4b5fd;border:1px solid var(--line);border-radius:99px;padding:4px 10px;margin-left:8px;vertical-align:middle}
+.grid{display:grid;grid-template-columns:1fr 340px;gap:22px;align-items:start}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:22px;backdrop-filter:blur(12px)}
+.card h2{font-size:16px;margin-bottom:14px;display:flex;gap:8px;align-items:center}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.tab{border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--mut);padding:9px 14px;border-radius:12px;cursor:pointer;font-size:14px;font-weight:600}
+.tab.on{background:linear-gradient(135deg,var(--acc),#5b21b6);color:#fff;border-color:transparent}
+.drop{border:2px dashed rgba(167,139,250,.5);border-radius:16px;padding:28px 16px;text-align:center;color:var(--mut);cursor:pointer;transition:.2s}
+.drop:hover,.drop.over{background:rgba(124,58,237,.12);border-color:#a78bfa;color:var(--txt)}
+.drop b{color:var(--txt);display:block;font-size:16px;margin-bottom:4px}
+textarea{width:100%;min-height:180px;background:#0d0a1f;border:1px solid var(--line);border-radius:14px;color:#d9f99d;padding:14px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;resize:vertical}
+.hidden{display:none!important}
+.files{margin-top:10px;font-size:13px;color:var(--mut);max-height:130px;overflow:auto}
+.files div{padding:3px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+label{font-size:13px;font-weight:600;color:#ddd6fe;display:block;margin:16px 0 6px}
+label small{color:var(--mut);font-weight:400}
+input[type=text],input[type=number],select{width:100%;background:#0d0a1f;border:1px solid var(--line);border-radius:12px;color:var(--txt);padding:12px;font-size:15px;outline:none}
+input:focus,select:focus,textarea:focus{border-color:#a78bfa}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:560px){.row{grid-template-columns:1fr}}
+.hint{font-size:12px;color:var(--mut);margin-top:5px}.hint.bad{color:var(--err)}.hint.good{color:var(--ok)}
+.iconrow{display:flex;gap:16px;align-items:center}
+#iconPrev{width:74px;height:74px;border-radius:20px;object-fit:cover;background:linear-gradient(135deg,var(--acc),var(--acc2));display:grid;place-items:center;font-size:30px;font-weight:800;border:1px solid var(--line)}
+input[type=color]{width:64px;height:44px;border:1px solid var(--line);border-radius:12px;background:#0d0a1f;padding:4px;cursor:pointer}
+.switch{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:14px}
+.switch input{width:20px;height:20px;accent-color:var(--acc)}
+.btn{width:100%;margin-top:22px;border:0;border-radius:16px;padding:16px;font-size:17px;font-weight:800;color:#fff;background:linear-gradient(135deg,var(--acc),var(--acc2));cursor:pointer;box-shadow:0 12px 32px rgba(124,58,237,.45)}
+.btn:disabled{opacity:.55;cursor:wait}
+.progress{height:12px;background:#171233;border-radius:99px;overflow:hidden;margin:14px 0 8px}
+.progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,#a78bfa,#22d3ee);border-radius:99px;transition:width .5s}
+.log{background:#0d0a1f;border:1px solid var(--line);border-radius:14px;padding:12px 14px;font-size:13px;color:var(--mut);max-height:170px;overflow:auto;white-space:pre-wrap}
+.dl{display:block;text-align:center;text-decoration:none;margin-top:14px;background:linear-gradient(135deg,#16a34a,#059669);color:#fff;font-weight:800;padding:15px;border-radius:16px;font-size:16px}
+.errbox{display:none;margin-top:14px;background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.4);color:#fecaca;border-radius:14px;padding:12px 14px;font-size:13px;white-space:pre-wrap}
+.phone{width:290px;margin:0 auto;background:#05030d;border:1px solid var(--line);border-radius:38px;padding:12px;box-shadow:0 30px 60px rgba(0,0,0,.5)}
+.screen{background:#fff;border-radius:28px;overflow:hidden;height:520px;display:flex;flex-direction:column}
+.statusbar{padding:10px 14px;color:#fff;font-size:12px;display:flex;justify-content:space-between;align-items:center}
+.appbar{display:flex;gap:10px;align-items:center;padding:10px 14px;color:#fff}
+.appbar img{width:34px;height:34px;border-radius:9px;object-fit:cover;background:rgba(255,255,255,.25)}
+.appbar b{font-size:15px}.appbar small{display:block;opacity:.85;font-weight:400}
+iframe{flex:1;width:100%;border:0;background:#fff}
+.empty{flex:1;display:grid;place-items:center;color:#6b7280;font-size:13px;text-align:center;padding:20px}
+footer{color:var(--mut);font-size:13px;text-align:center;margin-top:28px;line-height:1.7}
+.kbd{background:#1e1745;border:1px solid var(--line);border-radius:6px;padding:1px 7px;font-size:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">📱</div>
+    <div>
+      <h1>Web<span>2</span>APK <span class="badge">HTML · CSS · JS · WASM → Android</span></h1>
+    </div>
+  </header>
+  <p class="sub">Transforme seu site em um <b>aplicativo Android de verdade</b>: envie o HTML, um ZIP ou a pasta do projeto, escolha nome, pacote, versão e ícone — e baixe o <b>.apk</b> pronto para instalar.</p>
+
+  <div class="grid">
+    <div class="card">
+      <h2>1️⃣ &nbsp;Seu site</h2>
+      <div class="tabs">
+        <button class="tab on" data-mode="code">✍️ Colar HTML</button>
+        <button class="tab" data-mode="html">📄 Arquivo .html</button>
+        <button class="tab" data-mode="zip">🗜️ Arquivo .zip</button>
+        <button class="tab" data-mode="folder">📁 Pasta do projeto</button>
+      </div>
+
+      <div id="pane-code">
+        <textarea id="htmlCode" spellcheck="false">&lt;!DOCTYPE html&gt;
+&lt;html lang="pt-BR"&gt;
+&lt;head&gt;&lt;meta charset="utf-8"&gt;&lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;
+&lt;style&gt;body{font-family:sans-serif;text-align:center;padding:40px;background:#f5f3ff}button{background:#7c3aed;color:#fff;border:0;padding:14px 26px;border-radius:12px;font-size:16px}&lt;/style&gt;&lt;/head&gt;
+&lt;body&gt;&lt;h1&gt;Olá! 👋&lt;/h1&gt;&lt;p&gt;Este é meu primeiro app feito de um site.&lt;/p&gt;
+&lt;button onclick="document.querySelector('p').textContent='Você clicou! O JavaScript funciona 🎉'"&gt;Clique aqui&lt;/button&gt;&lt;/body&gt;
+&lt;/html&gt;</textarea>
+        <p class="hint">Para projetos com vários arquivos (CSS, JS, imagens, .wasm), use a aba ZIP ou Pasta.</p>
+      </div>
+
+      <div id="pane-drop" class="hidden">
+        <div class="drop" id="dropZone">
+          <b id="dropTitle">Clique ou arraste o arquivo .zip aqui</b>
+          <span id="dropHint">O ZIP precisa ter um index.html (na raiz ou numa subpasta)</span>
+        </div>
+        <input type="file" id="fileInput" class="hidden">
+        <div class="files" id="fileList"></div>
+      </div>
+
+      <h2 style="margin-top:24px">2️⃣ &nbsp;Dados do aplicativo</h2>
+      <div class="row">
+        <div>
+          <label>Nome do app</label>
+          <input type="text" id="appName" placeholder="Ex.: Minha Loja" maxlength="60">
+        </div>
+        <div>
+          <label>Versão <small>(nome)</small></label>
+          <input type="text" id="versionName" value="1.0.0" placeholder="1.0.0">
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>Nome do pacote <small>(único, tipo endereço do app)</small></label>
+          <input type="text" id="packageName" placeholder="com.minhaempresa.meuapp">
+          <p class="hint" id="pkgHint">Só letras minúsculas, números e pontos. Ex.: com.seunome.meuapp</p>
+        </div>
+        <div>
+          <label>Versão <small>(código — opcional)</small></label>
+          <input type="number" id="versionCode" placeholder="Automático" min="1">
+          <p class="hint">Aumente a cada atualização publicada.</p>
+        </div>
+      </div>
+
+      <label>Foto / ícone do app <small>(PNG ou JPG — se não enviar, criamos um com a inicial do nome)</small></label>
+      <div class="iconrow">
+        <div id="iconPrev">A</div>
+        <div style="flex:1">
+          <input type="file" id="iconInput" accept="image/png,image/jpeg,image/webp">
+          <p class="hint">Dica: imagem quadrada, pelo menos 512×512.</p>
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Cor do tema</label>
+          <input type="color" id="themeColor" value="#6d28d9">
+        </div>
+        <div>
+          <label>Orientação da tela</label>
+          <select id="orientation">
+            <option value="auto">Automática (gira)</option>
+            <option value="portrait">Só em pé (retrato)</option>
+            <option value="landscape">Só deitada (paisagem)</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="margin-top:8px">
+        <div class="switch"><span>🌐 Permitir internet <small style="color:var(--mut)">(sites que buscam dados online)</small></span><input type="checkbox" id="internet"></div>
+        <div class="switch"><span>🔍 Permitir zoom com os dedos</span><input type="checkbox" id="zoom"></div>
+      </div>
+
+      <button class="btn" id="buildBtn">🚀 &nbsp;Gerar meu APK</button>
+
+      <div id="result" class="hidden">
+        <div class="progress"><i id="bar"></i></div>
+        <p id="stepText" style="font-size:14px;color:#ddd6fe"></p>
+        <div class="log" id="logBox" style="margin-top:10px"></div>
+        <div class="errbox" id="errBox"></div>
+        <a class="dl hidden" id="downloadBtn" href="#">⬇️ &nbsp;Baixar o APK</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>📲 Prévia</h2>
+      <div class="phone">
+        <div class="screen">
+          <div class="statusbar" id="statusbar"><span>9:41</span><span>📶 🔋</span></div>
+          <div class="appbar" id="appbar"><img id="barIcon" alt=""><div><b id="barName">Meu App</b><small id="barPkg">com.meuapp</small></div></div>
+          <iframe id="preview" class="hidden" title="prévia"></iframe>
+          <div class="empty" id="previewEmpty">A prévia do seu site<br>aparece aqui 👀</div>
+        </div>
+      </div>
+      <p class="hint" style="margin-top:14px;text-align:center">Suporta HTML, CSS, JavaScript, imagens, fontes, áudio/vídeo e <b>WebAssembly (.wasm)</b> — tudo funciona offline dentro do app.</p>
+    </div>
+  </div>
+
+  <details style="max-width:560px;margin:22px auto 0;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 18px">
+    <summary style="cursor:pointer;font-size:14px;font-weight:700">⚙️ Configuração do servidor de geração (só para o dono do site)</summary>
+    <p class="hint" style="margin-top:10px">Na Vercel fica só a interface — quem compila o APK é o backend (Render/Railway/VPS). Cole a URL dele aqui para testar neste navegador, ou configure de forma definitiva no arquivo <span class="kbd">vercel.json</span> (recomendado, vale para todos os visitantes).</p>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <input type="text" id="apiUrl" placeholder="https://web2apk-backend.onrender.com" style="flex:1">
+      <button id="saveApi" style="border:0;border-radius:12px;padding:0 18px;font-weight:700;background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff;cursor:pointer">Salvar</button>
+    </div>
+  </details>
+
+  <footer>
+    O APK gerado é assinado com chave de teste e instala em qualquer Android (ative “instalar de fontes desconhecidas” se pedir).<br>
+    Para publicar na Play Store, assine depois com sua própria chave. Feito com WebView nativa — Android 7.0 ou superior.
+  </footer>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+// Na Vercel este site é só a interface. A geração do APK roda no backend.
+// 1ª opção: rewrite em vercel.json (visitante nem percebe) — API_BASE fica ''
+// 2ª opção (teste rápido): salve a URL do backend abaixo, no rodapé da página
+const API_BASE = (localStorage.getItem('web2apk_api') || '').replace(/\/$/, '');
+const api = p => API_BASE + p;
+let mode = 'code', pickedFiles = [], iconFile = null;
+
+// ---------- abas ----------
+const dropConfig = {
+  html:   { title: 'Clique ou arraste o arquivo .html aqui', hint: 'Um arquivo HTML único (CSS/JS embutidos nele funcionam)', accept: '.html,.htm', multiple:false },
+  zip:    { title: 'Clique ou arraste o arquivo .zip aqui',  hint: 'O ZIP precisa ter um index.html (na raiz ou numa subpasta)', accept: '.zip', multiple:false },
+  folder: { title: 'Clique ou arraste a pasta do projeto',   hint: 'Ou clique para escolher a pasta — precisa ter um index.html', accept: '', multiple:true, folder:true },
+};
+document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {
+  document.querySelectorAll('.tab').forEach(x => x.classList.remove('on'));
+  t.classList.add('on'); mode = t.dataset.mode; pickedFiles = []; renderFileList();
+  $('#pane-code').classList.toggle('hidden', mode !== 'code');
+  $('#pane-drop').classList.toggle('hidden', mode === 'code');
+  if (mode !== 'code') { const c = dropConfig[mode]; $('#dropTitle').textContent = c.title; $('#dropHint').textContent = c.hint;
+    const fi = $('#fileInput'); fi.accept = c.accept; fi.multiple = c.multiple; fi.webkitdirectory = !!c.folder; }
+  updatePreview();
+}));
+
+// ---------- arquivos ----------
+const fi = $('#fileInput');
+$('#dropZone').addEventListener('click', () => fi.click());
+fi.addEventListener('change', () => { pickedFiles = [...fi.files]; renderFileList(); previewFromFiles(); });
+['dragover','dragleave','drop'].forEach(ev => $('#dropZone').addEventListener(ev, e => {
+  e.preventDefault(); $('#dropZone').classList.toggle('over', ev === 'dragover');
+  if (ev === 'drop') {
+    const items = [...(e.dataTransfer.items || [])];
+    const dirEntry = items.map(i => i.webkitGetAsEntry && i.webkitGetAsEntry()).find(en => en && en.isDirectory);
+    if (dirEntry) { walkEntry(dirEntry, '').then(fs_ => { pickedFiles = fs_; renderFileList(); previewFromFiles(); }); }
+    else { pickedFiles = [...e.dataTransfer.files]; renderFileList(); previewFromFiles(); }
+  }
+}));
+function walkEntry(entry, prefix) {
+  return new Promise(res => {
+    if (entry.isFile) entry.file(f => { try { Object.defineProperty(f, 'webkitRelativePath', { value: prefix + f.name }); } catch(e){} res([f]); }, () => res([]));
+    else if (entry.isDirectory) { const r = entry.createReader(); r.readEntries(async es => { let out = []; for (const en of es) out = out.concat(await walkEntry(en, prefix + entry.name + '/')); res(out); }, () => res([])); }
+    else res([]);
+  });
+}
+function relOf(f) { return f.webkitRelativePath || f.name; }
+function renderFileList() {
+  const box = $('#fileList');
+  if (!pickedFiles.length) { box.innerHTML = ''; return; }
+  const total = pickedFiles.reduce((a, f) => a + f.size, 0);
+  box.innerHTML = `<div><b style="color:#ddd6fe">${pickedFiles.length} arquivo(s)</b> · ${(total/1024).toFixed(1)} KB no total</div>` +
+    pickedFiles.slice(0, 40).map(f => `<div>📄 ${relOf(f)} <span style="opacity:.6">(${(f.size/1024).toFixed(1)} KB)</span></div>`).join('') +
+    (pickedFiles.length > 40 ? `<div>… e mais ${pickedFiles.length - 40}</div>` : '');
+}
+
+// ---------- ícone / nome ----------
+$('#iconInput').addEventListener('change', e => {
+  iconFile = e.target.files[0] || null;
+  if (iconFile) { const u = URL.createObjectURL(iconFile); $('#iconPrev').innerHTML = `<img src="${u}" style="width:100%;height:100%;border-radius:20px;object-fit:cover">`; $('#barIcon').src = u; }
+});
+$('#themeColor').addEventListener('input', e => { $('#statusbar').style.background = e.target.value; $('#appbar').style.background = e.target.value; $('#iconPrev').style.background = e.target.value; });
+$('#themeColor').dispatchEvent(new Event('input'));
+$('#appName').addEventListener('input', e => {
+  const name = e.target.value.trim();
+  $('#barName').textContent = name || 'Meu App';
+  if (!iconFile) $('#iconPrev').textContent = (name[0] || 'A').toUpperCase();
+  const slug = name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '');
+  const pkg = $('#packageName');
+  if (slug && !pkg.dataset.touched) { pkg.value = 'com.' + slug + '.app'; validatePkg(); }
+});
+$('#packageName').addEventListener('input', e => { e.target.dataset.touched = '1'; validatePkg(); });
+function validatePkg() {
+  const v = $('#packageName').value.trim(), h = $('#pkgHint'), ok = /^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$/.test(v);
+  $('#barPkg').textContent = v || 'com.meuapp';
+  h.className = 'hint ' + (v ? (ok ? 'good' : 'bad') : '');
+  h.textContent = !v ? 'Só letras minúsculas, números e pontos. Ex.: com.seunome.meuapp' : ok ? '✅ Pacote válido!' : '❌ Inválido — use minúsculas e pelo menos um ponto. Ex.: com.seunome.meuapp';
+  return ok;
+}
+
+// ---------- prévia ----------
+function showPreview(html) {
+  const fr = $('#preview');
+  if (html) { fr.srcdoc = html; fr.classList.remove('hidden'); $('#previewEmpty').classList.add('hidden'); }
+}
+async function previewFromFiles() {
+  const idx = pickedFiles.find(f => relOf(f).toLowerCase().endsWith('index.html')) || pickedFiles.find(f => /\.html?$/i.test(f.name));
+  if (idx) showPreview(await idx.text());
+}
+function updatePreview() { if (mode === 'code') showPreview($('#htmlCode').value); }
+$('#htmlCode').addEventListener('input', updatePreview); updatePreview();
+
+// ---------- gerar APK ----------
+$('#buildBtn').addEventListener('click', async () => {
+  const name = $('#appName').value.trim();
+  if (!name) return alert('Dê um nome ao seu app 🙂');
+  if (!validatePkg()) return alert('Corrija o nome do pacote antes de gerar.');
+  if (mode !== 'code' && !pickedFiles.length) return alert('Envie os arquivos do seu site primeiro.');
+
+  const fd = new FormData();
+  fd.append('mode', mode);
+  fd.append('appName', name);
+  fd.append('packageName', $('#packageName').value.trim());
+  fd.append('versionName', $('#versionName').value.trim() || '1.0.0');
+  fd.append('versionCode', $('#versionCode').value || '');
+  fd.append('themeColor', $('#themeColor').value);
+  fd.append('orientation', $('#orientation').value);
+  if ($('#internet').checked) fd.append('internet', 'on');
+  if ($('#zoom').checked) fd.append('zoom', 'on');
+  if (iconFile) fd.append('iconFile', iconFile);
+
+  if (mode === 'code') fd.append('htmlCode', $('#htmlCode').value);
+  else if (mode === 'html') fd.append('htmlFile', pickedFiles[0]);
+  else if (mode === 'zip') fd.append('zipFile', pickedFiles[0]);
+  else pickedFiles.forEach(f => fd.append('siteFiles', f, relOf(f)));
+
+  const btn = $('#buildBtn'); btn.disabled = true; btn.textContent = '⏳ Gerando seu APK…';
+  $('#result').classList.remove('hidden'); $('#errBox').style.display = 'none'; $('#downloadBtn').classList.add('hidden');
+  $('#bar').style.width = '4%'; $('#logBox').textContent = ''; $('#stepText').textContent = 'Enviando arquivos…';
+
+  try {
+    const r = await fetch(api('/api/build'), { method: 'POST', body: fd });
+    const data = await r.json();
+    if (!data.jobId) throw new Error(data.error || 'Erro ao iniciar a geração.');
+    const poll = setInterval(async () => {
+      const jr = await (await fetch(api('/api/job/' + data.jobId))).json();
+      $('#bar').style.width = (jr.progress || 0) + '%';
+      $('#stepText').textContent = jr.step || '';
+      $('#logBox').textContent = (jr.log || []).join('\n');
+      $('#logBox').scrollTop = 1e6;
+      if (jr.status === 'done') {
+        clearInterval(poll);
+        const db = $('#downloadBtn');
+        db.href = jr.downloadUrl.startsWith('http') ? jr.downloadUrl : api(jr.downloadUrl); db.textContent = `⬇️ Baixar o APK (${(jr.size / 1024).toFixed(0)} KB)`;
+        db.classList.remove('hidden'); btn.disabled = false; btn.textContent = '🚀 Gerar meu APK de novo';
+      } else if (jr.status === 'error') {
+        clearInterval(poll);
+        $('#errBox').textContent = '❌ ' + jr.error; $('#errBox').style.display = 'block';
+        btn.disabled = false; btn.textContent = '🚀 Tentar de novo';
+      }
+    }, 900);
+  } catch (e) {
+    $('#errBox').textContent = '❌ ' + e.message; $('#errBox').style.display = 'block';
+    btn.disabled = false; btn.textContent = '🚀 Gerar meu APK';
+  }
+});
+$('#apiUrl').value = localStorage.getItem('web2apk_api') || '';
+$('#saveApi').addEventListener('click', () => { const v = $('#apiUrl').value.trim().replace(/\/$/, ''); if (v) localStorage.setItem('web2apk_api', v); else localStorage.removeItem('web2apk_api'); location.reload(); });
+fetch(api('/api/health')).then(r => r.json()).then(h => { if (!h.ok) { $('#errBox').textContent = '⚠️ ' + h.toolchain; $('#errBox').style.display = 'block'; } }).catch(() => {
+  $('#errBox').textContent = '⚠️ Servidor de geração (backend) não encontrado. Se você publicou só a interface na Vercel, configure a URL do backend no rodapé desta página ou ajuste o rewrite no vercel.json — veja DEPLOY-VERCEL.md.';
+  $('#errBox').style.display = 'block';
+});
+</script>
+</body>
+</html>

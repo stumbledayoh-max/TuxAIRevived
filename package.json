@@ -1,0 +1,12 @@
+{
+  "name": "web2apk",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Transforma HTML/CSS/JS/WASM em APK Android",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
