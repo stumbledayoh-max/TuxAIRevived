@@ -1,0 +1,101 @@
+name: "📦 Extrair projeto (ZIP → repositório)"
+
+# ============================================================
+#  O QUE ESTE ARQUIVO FAZ
+#  Voce sobe no GitHub apenas 2 arquivos (sem subir pastas):
+#    1. projeto.zip  (o ZIP do projeto Web2APK)
+#    2. este YML, em:  .github/workflows/extrair-projeto.yml
+#       (Create new file digitando o caminho com barras —
+#        o GitHub cria as pastas sozinho)
+#  Ai este workflow extrai o ZIP e grava todos os arquivos
+#  do projeto dentro do proprio repositorio. Depois disso:
+#    - a Vercel (ligada neste repo) publica o site sozinha;
+#    - o Render (Blueprint neste repo) sobe o backend sozinho.
+#  O link do backend voce cola nas CONFIGURACOES do site
+#  (rodape da pagina, area do cadeado/configuracoes) —
+#  nao precisa mexer em nenhum codigo.
+# ============================================================
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "projeto.zip"
+      - "web2apk.zip"
+      - "web2apk-vercel.zip"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: extrair-projeto
+  cancel-in-progress: false
+
+jobs:
+  extrair:
+    name: "Extrair o ZIP e gravar no repositório"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Baixar o repositório"
+        uses: actions/checkout@v4
+
+      - name: "Extrair o ZIP do projeto"
+        shell: bash
+        run: |
+          set -e
+          ZIP=""
+          for z in projeto.zip web2apk.zip web2apk-vercel.zip; do
+            if [ -f "$z" ]; then ZIP="$z"; break; fi
+          done
+          if [ -z "$ZIP" ]; then
+            echo "::error::Nenhum ZIP encontrado. Suba o ZIP do projeto na raiz do repositorio com o nome projeto.zip"
+            exit 1
+          fi
+          echo "Extraindo: $ZIP"
+          rm -rf _extraido _origem
+          mkdir -p _extraido
+          unzip -q "$ZIP" -d _extraido
+
+          # Se o ZIP tiver uma pasta-mae (ex.: web2apk/server.js), usa ela como raiz
+          SRC="_extraido"
+          if [ ! -f "$SRC/server.js" ]; then
+            FOUND="$(find _extraido -maxdepth 4 -name server.js | head -n 1)"
+            if [ -z "$FOUND" ]; then
+              echo "::error::Nao achei server.js dentro do ZIP — esse nao parece ser o ZIP do projeto Web2APK."
+              exit 1
+            fi
+            SRC="$(dirname "$FOUND")"
+          fi
+          echo "Raiz do projeto dentro do ZIP: $SRC"
+
+          # Copia tudo pra raiz do repositorio (sem tocar em .git/.github)
+          (cd "$SRC" && tar --exclude='./.git' --exclude='./.github' -cf - .) | tar -xf - -C .
+
+          # Vercel: so a interface (pasta public). Sem endereco de backend
+          # gravado no codigo — o link vai nas configuracoes do site.
+          cat > vercel.json <<'EOF'
+          {
+            "$schema": "https://openapi.vercel.sh/vercel.json",
+            "framework": null,
+            "outputDirectory": "public"
+          }
+          EOF
+
+          rm -rf _extraido
+          echo "Arquivos extraidos:"
+          ls -la
+
+      - name: "Gravar os arquivos no repositório"
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if [ -n "$(git status --porcelain)" ]; then
+            git add -A
+            git commit -m "📦 Extrai o projeto Web2APK do ZIP"
+            git push
+            echo "Pronto! Projeto gravado no repositorio."
+            echo "Agora ligue a Vercel e o Render neste mesmo repositorio (passo a passo no chat)."
+          else
+            echo "Nada mudou — o projeto ja estava extraido."
+          fi
